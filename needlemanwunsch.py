@@ -1,6 +1,9 @@
 import numpy as np
 import math
 
+base_seq_length = 6
+num_seq_bits = base_seq_length * 2
+
 
 def nw(x, y, match=1, mismatch=-1, gap=-1):
     nx = len(x)
@@ -87,16 +90,18 @@ class LinkedList:
                 return current.value
             current = current.next
 
-    def printAll(self):
+    def printAll(self, idx):
         current = self.head
+        print("index: ", idx, "string: ", current.key, "values: ",end=' ')
         while current:
-            print(current.key, current.value)
+            print(current.value, end=' ')
             current = current.next
+        print()
 
 
 class HashTable:
     def __init__(self, size):
-        self.table = [None] * 3200000
+        self.table = [None] * (2**num_seq_bits)
         self.size = size
 
     def hashKey(self, key) -> int:
@@ -116,7 +121,7 @@ class HashTable:
         idx = self.hashKey(key)
         if self.table[idx] is None:
             newLinkedList = LinkedList()
-            newLinkedList.insertAtFirst(key,value)
+            newLinkedList.insertAtFirst(key, value)
             self.table[idx] = newLinkedList
         else:
             self.table[idx].insertAtLast(key, value)
@@ -127,15 +132,15 @@ class HashTable:
             return self.table[idx].find(key)
 
     def printAll(self):
-        for i in self.table:
-            if i is not None:
-                i.printAll()
+        for i in range(len(self.table)):
+            if self.table[i]:
+                self.table[i].printAll(i)
 
 
-x = "AGATTCGATTACAAGAGATTACAGATTACAAATT"
+x = "AGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATT"
 y = "AGATTCGCAGGATTACAAGATGATTACAATACAA"
-ht = HashTable(math.ceil(len(x)/6))
-for i in range(len(x)):
+ht = HashTable(math.ceil(len(x)/4))
+for i in range(len(x) - 5):
     substr = x[i:i+6]
     ht.add(substr, i)
-# ht.printAll()
+ht.printAll()
