@@ -1,6 +1,9 @@
 import numpy as np
 import math
 
+base_seq_length = 6
+num_seq_bits = base_seq_length * 2
+
 
 def nw(x, y, match=1, mismatch=-1, gap=-1):
     nx = len(x)
@@ -57,9 +60,9 @@ x = "AGATTCGATTACAAGAGATTACAGATTACAAATT"
 y = "AGATTCGCAGGATTACAAGATGATTACAATACAA"
 print(nw(x, y))
 
+
 class Node:
-    def __init__(self, key, value, next=None):
-        self.key = key
+    def __init__(self, value, next=None):
         self.value = value
         self.next = next
 
@@ -69,73 +72,77 @@ class LinkedList:
         self.head = None
         self.size = 0
 
-    def insertAtFirst(self, key, value):
-        self.head = Node(key, value, self.head)
+    def insert_at_first(self, value):
+        self.head = Node(value, self.head)
         self.size += 1
 
-    def insertAtLast(self,key,value):
+    def insert_at_last(self, value):
         current = self.head
         while current.next:
             current = current.next
-        current.next = Node(key,value)
-        self.size+=1
+        current.next = Node(value)
+        self.size += 1
 
-    def find(self, key):
+    def find(self, value):
         current = self.head
         while current:
-            if current.key == key:
-                return current.value
+            if current.value == value:
+                return True
             current = current.next
+        return False
 
-    def printAll(self):
+    def print_all(self, idx):
         current = self.head
+        print("index: ", idx, "values: ", end=' ')
         while current:
-            print(current.key, current.value)
+            print(current.value, end=' ')
             current = current.next
+        print()
 
 
 class HashTable:
     def __init__(self, size):
-        self.table = [None] * 3200000
+        self.table = [None] * (2**num_seq_bits)
         self.size = size
 
-    def hashKey(self, key) -> int:
-        CODES = {
+    @staticmethod
+    def hash_key(sequence) -> int:
+        codes = {
             'A': '00',
             'C': '01',
             'G': '10',
             'T': '11'
         }
-        chars = list(key)
+        chars = list(sequence)
         binary_str = ''
         for char in chars:
-            binary_str += CODES[char]
+            binary_str += codes[char]
         return int(binary_str, 2)
 
-    def add(self, key, value):
-        idx = self.hashKey(key)
+    def add(self, sequence, value):
+        idx = self.hash_key(sequence)
         if self.table[idx] is None:
-            newLinkedList = LinkedList()
-            newLinkedList.insertAtFirst(key,value)
-            self.table[idx] = newLinkedList
+            new_linked_list = LinkedList()
+            new_linked_list.insert_at_first(value)
+            self.table[idx] = new_linked_list
         else:
-            self.table[idx].insertAtLast(key, value)
+            self.table[idx].insert_at_last(value)
 
-    def get(self, key) -> any:
-        idx = self.hashKey(key)
+    def get(self, sequence) -> any:
+        idx = self.hash_key(sequence)
         if self.table[idx] is not None:
-            return self.table[idx].find(key)
+            return self.table[idx].find(idx)
 
-    def printAll(self):
-        for i in self.table:
-            if i is not None:
-                i.printAll()
+    def print_all(self):
+        for i in range(len(self.table)):
+            if self.table[i]:
+                self.table[i].print_all(i)
 
 
-x = "AGATTCGATTACAAGAGATTACAGATTACAAATT"
+x = "AGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATT"
 y = "AGATTCGCAGGATTACAAGATGATTACAATACAA"
-ht = HashTable(math.ceil(len(x)/6))
-for i in range(len(x)):
+ht = HashTable(math.ceil(len(x)/4))
+for i in range(len(x) - 5):
     substr = x[i:i+6]
     ht.add(substr, i)
-# ht.printAll()
+ht.print_all()
