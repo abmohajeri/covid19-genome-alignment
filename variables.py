@@ -10,6 +10,8 @@ class Score(enum.Enum):
     mismatch = -1
 
 
-minimum_subseq = 100
-base_seq_length = 6
-num_seq_bits = base_seq_length * 2
+minimum_subseq_len = 100
+best_cut_threshold = 20
+base_seq_len = 6
+num_seq_bits = base_seq_len * 2
+middle_fault_tolerance = 5

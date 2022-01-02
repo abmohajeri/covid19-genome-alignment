@@ -54,11 +54,6 @@ def nw(genome1, genome2, match=variables.Score.match.value, mismatch=variables.S
     return '\n'.join([rx, ry])
 
 
-x = "AGATTCGATTACAAGAGATTACAGATTACAAATT"
-y = "AGATTCGCAGGATTACAAGATGATTACAATACAA"
-print(nw(x, y))
-
-
 class Node:
     def __init__(self, value, next=None):
         self.value = value
@@ -84,10 +79,10 @@ class LinkedList:
     def find(self, value):
         current = self.head
         while current:
-            if current.value == value:
-                return True
+            if value + variables.middle_fault_tolerance >= current.value >= value - variables.middle_fault_tolerance:
+                return True, current.value
             current = current.next
-        return False
+        return False, -1
 
     def print_all(self, idx):
         current = self.head
@@ -100,16 +95,15 @@ class LinkedList:
 
 class HashTable:
     def __init__(self, size):
-        self.table = [None] * (2**num_seq_bits)
-        self.size = size
+        self.table = [None] * size
 
     @staticmethod
     def hash_key(sequence) -> int:
         codes = {
-            'A': '00',
-            'C': '01',
-            'G': '10',
-            'T': '11'
+            'a': '00',
+            'c': '01',
+            'g': '10',
+            't': '11'
         }
         chars = list(sequence)
         binary_str = ''
@@ -126,37 +120,110 @@ class HashTable:
         else:
             self.table[idx].insert_at_last(value)
 
-    def get(self, sequence) -> any:
+    def get(self, sequence, genome1_len) -> any:
         idx = self.hash_key(sequence)
         if self.table[idx] is not None:
-            return self.table[idx].find(idx)
+            return self.table[idx].find(genome1_len/2)
+        else:
+            return False
 
     def print_all(self):
         for i in range(len(self.table)):
             if self.table[i]:
                 self.table[i].print_all(i)
 
+# x = "AGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATT"
+# y = "AGATTCGCAGGATTACAAGATGATTACAATACAA"
+# ht = HashTable(math.ceil(len(x)/4))
+# for i in range(len(x) - 5):
+#     substr = x[i:i+6]
+#     ht.add(substr, i)
+# ht.print_all()
 
-x = "AGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATTAGATTCGATTACAAGAGATTACAGATTACAAATT"
-y = "AGATTCGCAGGATTACAAGATGATTACAATACAA"
-ht = HashTable(math.ceil(len(x)/4))
-for i in range(len(x) - 5):
-    substr = x[i:i+6]
-    ht.add(substr, i)
-ht.print_all()
 
+def read_genomes(genome_path):
+    genome = []
+    with open(genome_path) as f:
+        while True:
+            # Read from file
+            c = f.read(1)
+            if not c:
+                break
+            elif c == '\n':
+                continue
+            else:
+                genome.append(c)
+    return genome
+
+def create_genome_arrays():
+    genome1 = read_genomes(variables.genome1_path)
+    genome2 = read_genomes(variables.genome2_path)
+    return genome1, genome2
 
 def create_hash_table(genome1):
+    ht = HashTable(2**variables.num_seq_bits)
+    for i in range(len(genome1) - 5):
+        substr = genome1[i:i+6]
+        ht.add(substr, i)
+    return ht
+
+# extend seed from back and front
+def seed_n_extend(genome1, genome2, start1, start2):
+    forward_equality = variables.base_seq_len
+    backward_equality = 0
+    genome1_forward_subseq = genome1[start1, start1 + forward_equality]
+    seed_forward = genome2[start2, start2 + forward_equality]
+    genome1_backward_subseq = genome1[start1, start1 + forward_equality]
+    seed_backward = genome2[start2, start2 + forward_equality]
+
+    while genome1_forward_subseq == seed_forward or genome1_backward_subseq == seed_backward:
+        equality = forward_equality + 1
+        backward_equality = backward_equality + 1
+        genome1_forward_subseq = genome1[start1, start1+equality]
+        seed_forward = genome2[start2, start2 + equality]
+        genome1_backward_subseq = genome1[start1 - backward_equality, start1+equality]
+        seed_backward = genome2[start2 - backward_equality, start2 + equality]
+
+    if forward_equality - 1 >= variables.best_cut_threshold:
+        return True, start1, start2
+    elif backward_equality - 1 >= variables.best_cut_threshold - variables.base_seq_len:
+        return True, start1 - backward_equality, start2 - backward_equality
+    else:
+        return False, -1, -1
+
+def reboot_best_cut(genome2, genome2_mid):
+    seed = genome2[genome2_mid + 1, genome2_mid + variables.base_seq_len + 1]
+    genome2_mid = genome2_mid + 1
+    return seed, genome2_mid
+
+def find_best_cut(ht, genome1, genome2):
+    genome2_mid = len(genome2) / 2
+    genome1_cut = 0
+    genome2_cut = 0
+    seed = genome2[genome2_mid, genome2_mid + variables.base_seq_len]
+    while len(seed) <= len(genome2) - variables.base_seq_len:
+        found, genome1_mid = ht.get(seed)
+        if found:
+            best_cunt_found, genome1_cut, genome2_cut = seed_n_extend(genome1, genome2, genome1_mid, genome2_mid)
+            if best_cunt_found:
+                return True, genome1_cut, genome2_cut
+            else:
+                seed, genome2_mid = reboot_best_cut(genome2, genome2_mid)
+                continue
+        else:
+            seed, genome2_mid = reboot_best_cut(genome2, genome2_mid)
+            continue
+    return False, genome1_cut, genome2_cut
+
+def divide_n_conquer_seq_align():
     pass
 
-
-def create_genome_arrays(genome1_path, genome2_path):
-    pass
-
-
-def find_best_cut(genome1, genome2):
-    pass
+,
+def main():
+    genome1, genome2 = create_genome_arrays()
+    ht = create_hash_table(genome1)
+    find_best_cut(ht, genome1, genome2)
 
 
-def d_n_c_seq_align():
-    pass
+if __name__ == '__main__':
+    main()
