@@ -1,13 +1,11 @@
 import numpy as np
 import math
-
-base_seq_length = 6
-num_seq_bits = base_seq_length * 2
+import variables
 
 
-def nw(x, y, match=1, mismatch=-1, gap=-1):
-    nx = len(x)
-    ny = len(y)
+def nw(genome1, genome2, match=variables.Score.match.value, mismatch=variables.Score.mismatch.value, gap=variables.Score.gap.value):
+    nx = len(genome1)
+    ny = len(genome2)
     f = np.zeros((nx + 1, ny + 1))
     f[:, 0] = np.linspace(0, -nx, nx + 1)
     f[0, :] = np.linspace(0, -ny, ny + 1)
@@ -19,7 +17,7 @@ def nw(x, y, match=1, mismatch=-1, gap=-1):
     t = np.zeros(3)
     for i in range(nx):
         for j in range(ny):
-            if x[i] == y[j]:
+            if genome1[i] == genome2[j]:
                 t[0] = f[i, j] + match
             else:
                 t[0] = f[i, j] + mismatch
@@ -39,17 +37,17 @@ def nw(x, y, match=1, mismatch=-1, gap=-1):
     ry = []
     while i > 0 or j > 0:
         if p[i, j] in [2, 5, 6, 9]:
-            rx.append(x[i-1])
-            ry.append(y[j-1])
+            rx.append(genome1[i - 1])
+            ry.append(genome2[j - 1])
             i -= 1
             j -= 1
         elif p[i, j] in [3, 5, 7, 9]:
-            rx.append(x[i-1])
+            rx.append(genome1[i - 1])
             ry.append('-')
             i -= 1
         elif p[i, j] in [4, 6, 7, 9]:
             rx.append('-')
-            ry.append(y[j-1])
+            ry.append(genome2[j - 1])
             j -= 1
     rx = ''.join(rx)[::-1]
     ry = ''.join(ry)[::-1]
@@ -146,3 +144,19 @@ for i in range(len(x) - 5):
     substr = x[i:i+6]
     ht.add(substr, i)
 ht.print_all()
+
+
+def create_hash_table(genome1):
+    pass
+
+
+def create_genome_arrays(genome1_path, genome2_path):
+    pass
+
+
+def find_best_cut(genome1, genome2):
+    pass
+
+
+def d_n_c_seq_align():
+    pass
