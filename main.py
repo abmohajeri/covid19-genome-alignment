@@ -231,7 +231,7 @@ def plot_result(parts, gene_parts=variables.gene_parts, MARGIN=variables.MARGIN,
 
 
 def main():
-    print(divide_n_conquer_seq_align(genome1, genome2))
+    print(divide_n_conquer_seq_align(part_num, genome1, genome2))
     plot_result(parts)
 
 
