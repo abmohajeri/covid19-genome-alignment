@@ -22,3 +22,18 @@ best_cut_threshold = 20
 base_seq_len = 6
 num_seq_bits = base_seq_len * 2
 middle_fault_tolerance = 50
+
+# plot vars
+COLORS = {
+    'A': (0, 0, 255),
+    'C': (0, 255, 0),
+    'T': (225, 150, 7),
+    'G': (225, 10, 190),
+    '-': (200, 200, 200),
+}
+gene_parts = 2
+font_scale = 0.5
+thickness = 1
+MARGIN = 30
+LINE_HEIGHT = 25
+CHARACTER_SPACE = 30
