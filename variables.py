@@ -24,7 +24,7 @@ num_seq_bits = base_seq_len * 2
 middle_fault_tolerance = 10
 
 # Plot Variables
-COLORS = {
+colors = {
     'A': (0, 0, 255),
     'C': (0, 255, 0),
     'T': (225, 150, 7),
@@ -34,6 +34,6 @@ COLORS = {
 gene_parts = 2
 font_scale = 0.5
 thickness = 1
-MARGIN = 30
-LINE_HEIGHT = 25
-CHARACTER_SPACE = 30
+margin = 30
+line_height = 25
+character_space = 30

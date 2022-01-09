@@ -25,9 +25,9 @@ def putChar(img, char, position, COLORS, font_scale, thickness):
                 thickness=thickness, lineType=cv2.LINE_AA)
 
 
-def plot_result(parts, gene_parts=variables.gene_parts, MARGIN=variables.MARGIN,
-                CHARACTER_SPACE=variables.CHARACTER_SPACE, font_scale=variables.font_scale,
-                COLORS=variables.COLORS, thickness=variables.thickness, LINE_HEIGHT=variables.LINE_HEIGHT):
+def plot_result(parts, gene_parts=variables.gene_parts, MARGIN=variables.margin,
+                CHARACTER_SPACE=variables.character_space, font_scale=variables.font_scale,
+                COLORS=variables.colors, thickness=variables.thickness, LINE_HEIGHT=variables.line_height):
     sub_plots = []
     parts_sorted = sorted(parts, key=lambda x: x[0])
 
