@@ -17,11 +17,11 @@ codes = {
     'T': '11'
 }
 
-minimum_subseq_len = 100  # aka k
-best_cut_threshold = 20
+maximum_subseq_len = 200    # aka k
+best_cut_threshold = 50
 base_seq_len = 6
 num_seq_bits = base_seq_len * 2
-middle_fault_tolerance = 50
+middle_fault_tolerance = 10
 
 # Plot Variables
 COLORS = {

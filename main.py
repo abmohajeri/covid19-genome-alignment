@@ -132,7 +132,7 @@ def divide_n_conquer_seq_align(part, genome1, genome2):
     p2 = part_num + 1
     part_num += 1
 
-    if len(genome1) <= variables.minimum_subseq_len and len(genome2) <= variables.minimum_subseq_len:
+    if len(genome1) <= variables.maximum_subseq_len and len(genome2) <= variables.maximum_subseq_len:
         return nw(part, genome1, genome2)
     else:
         genome1_cut, genome2_cut = find_best_cut(genome1, genome2)
