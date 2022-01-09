@@ -1,10 +1,7 @@
-import numpy as np
 import variables
+import numpy as np
 from genome_hash_table import HashTable
-
-from typing import Collection
-from numpy.core.fromnumeric import var
-import cv2
+from export import plot_result
 
 parts = []
 part_num = 0
@@ -12,9 +9,8 @@ part_num = 0
 
 def nw(part, genome1, genome2, match=variables.Score.match.value, mismatch=variables.Score.mismatch.value,
        gap=variables.Score.gap.value):
-       
     global parts
-       
+
     nx = len(genome1)
     ny = len(genome2)
     f = np.zeros((nx + 1, ny + 1))
@@ -52,42 +48,21 @@ def nw(part, genome1, genome2, match=variables.Score.match.value, mismatch=varia
             ry.append(genome2[j - 1])
             i -= 1
             j -= 1
-        elif p[i, j] in [3, 5, 7, 9]:
+        elif p[i, j] in [3, 7]:
             rx.append(genome1[i - 1])
             ry.append('-')
             i -= 1
-        elif p[i, j] in [4, 6, 7, 9]:
+        elif p[i, j] in [4]:
             rx.append('-')
             ry.append(genome2[j - 1])
             j -= 1
     rx = ''.join(rx)[::-1]
     ry = ''.join(ry)[::-1]
-    
+
     parts.append((part, rx, ry))
-       
+
     score = f[-1, -1]
     return score
-
-
-def read_genomes(genome_path):
-    genome = []
-    with open(genome_path) as f:
-        while True:
-            # Read from file
-            c = f.read(1)
-            if not c:
-                break
-            elif c == '\n':
-                continue
-            else:
-                genome.append(c)
-    return genome
-
-
-def create_genome_arrays():
-    genome1 = read_genomes(variables.genome1_path)
-    genome2 = read_genomes(variables.genome2_path)
-    return genome1, genome2
 
 
 def create_hash_table(genome1):
@@ -149,7 +124,6 @@ def find_best_cut(genome1, genome2):
 
 
 def divide_n_conquer_seq_align(part, genome1, genome2):
-    global total_score
     global part_num
        
     p1 = part_num + 1
@@ -166,68 +140,29 @@ def divide_n_conquer_seq_align(part, genome1, genome2):
                       divide_n_conquer_seq_align(p2, genome1[genome1_cut:-1], genome2[genome2_cut:-1])
 
 
+def read_genomes(genome_path):
+    genome = []
+    with open(genome_path) as f:
+        while True:
+            # Read from file
+            c = f.read(1)
+            if not c:
+                break
+            elif c == '\n':
+                continue
+            else:
+                genome.append(c)
+    return genome
+
+
+def create_genome_arrays():
+    genome1 = read_genomes(variables.genome1_path)
+    genome2 = read_genomes(variables.genome2_path)
+    return genome1, genome2
+
+
 genome1, genome2 = create_genome_arrays()
 ht = create_hash_table(genome1)
-
-
-def vconcat_resize(img_list, resize_type='min', interpolation = cv2.INTER_CUBIC):
-    w_min = None
-    if resize_type == 'min':
-        w_min = min(img.shape[1] for img in img_list)
-    elif resize_type == 'max':
-        w_min = max(img.shape[1] for img in img_list)
-    else:
-        w_min = max(img.shape[1] for img in img_list)
-
-
-    im_list_resize = [cv2.resize(img, (w_min, int(img.shape[0] * w_min / img.shape[1])), interpolation = interpolation) for img in img_list]
-
-    return cv2.vconcat(im_list_resize)
-  
-def putChar(img, char, position, COLORS, font_scale, thickness):
-    cv2.rectangle(img, (position[0]-3, position[1]-15), (position[0]+15, position[1]+3), COLORS[char], thickness=-1)
-    cv2.rectangle(img, (position[0]-3, position[1]-15), (position[0]+15, position[1]+3),(0,0,0), thickness=1)
-    cv2.putText(img, char, position, cv2.FONT_HERSHEY_SIMPLEX, fontScale=font_scale, color=(0, 0, 0), thickness=thickness, lineType =cv2.LINE_AA)
-    
-def plot_result(parts, gene_parts=variables.gene_parts, MARGIN=variables.MARGIN, 
-            CHARACTER_SPACE=variables.CHARACTER_SPACE, font_scale=variables.font_scale, 
-            COLORS=variables.COLORS, thickness=variables.thickness, LINE_HEIGHT=variables.LINE_HEIGHT):
-    
-    sub_plots = []
-    parts_sorted = sorted(parts, key = lambda x: x[0])
-
-
-    for i in range(len(parts_sorted)):
-
-        seqAlign1 = parts_sorted[i][1]
-        seqAlign2 = parts_sorted[i][2]
-
-        length = len(seqAlign1)
-
-        count1 = length - seqAlign1.count('-')
-        count2 = length - seqAlign2.count('-')
-
-
-        img = np.zeros([ gene_parts*20 + 2*MARGIN - 15, length*15 + 3*MARGIN,3], dtype=np.uint8)
-        img.fill(255)
-
-        for j in range(length):
-            
-            position1 = (MARGIN + int(j * CHARACTER_SPACE * font_scale), MARGIN)
-            position2 = (MARGIN + int(j * CHARACTER_SPACE * font_scale), MARGIN + LINE_HEIGHT)
-
-            putChar(img, seqAlign1[j], position1, COLORS, font_scale, thickness)
-            putChar(img, seqAlign2[j], position2, COLORS, font_scale, thickness)
-
-        cv2.putText(img, str(count1), (MARGIN + int(length * CHARACTER_SPACE * font_scale) + 25, MARGIN), cv2.FONT_HERSHEY_SIMPLEX, fontScale=font_scale, color=(0, 0, 0), thickness=thickness, lineType =cv2.LINE_AA)
-        cv2.putText(img, str(count2), (MARGIN + int(length * CHARACTER_SPACE * font_scale) + 25, MARGIN + LINE_HEIGHT), cv2.FONT_HERSHEY_SIMPLEX, fontScale=font_scale, color=(0, 0, 0), thickness=thickness, lineType =cv2.LINE_AA)
-
-        sub_plots.append(img)
-
-    result = vconcat_resize(sub_plots, 'max')
-    cv2.imwrite('RESULT.jpg', result)
-
-
 
 
 def main():
