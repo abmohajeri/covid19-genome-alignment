@@ -1,6 +1,5 @@
 # Covid-19 Sequence Alignment
-covid-19 sequence alignment is a variation of needleman wuncsh algorithm for solving long sequences like covid-19 genomes  
-written python using divide & conquer approach and hashtable.
+Covid-19 sequence alignment is a variation of Needleman-Wuncsh algorithm for solving long sequences like Covid-19 genomes written python using divide & conquer approach and hashtable.
 
 ## Usage
 ### Install Prerequisites
